@@ -1,5 +1,4 @@
-# Nature-Shop-Website
-#Plants Shop Website "NATURE"
+# Plants Shop Website "NATURE"
 
  I have developed the client-side of a product selling website that shows plants shop and description about them on this website. plants details include written description, sample photos and videos. The website will showcase my products to catch maximum attraction of user while facilitating them with advanced accessibility and usability features.
 
