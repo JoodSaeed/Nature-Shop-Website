@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html>
+<!--head-->
+<head >
+	<title> NATURE</title>
+	<meta charset="UTF-8">
+	  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	  	<link rel = "stylesheet" type = "text/css" href= "style.css">
+		<script src="jquery-3.6.0.min.js"></script>
+	</head>
+
+	<div class"container">
+	<img src= "Nature.jpg" width="100px"; style="float:left" alt="Website Logo" <!-- Logo Size -->
+	</div>
+	
+</head>
+<body>
+	<ul>
+	  <li><a href="home.html">Home</a></li>
+	  <li><a href="items.html">ITEMS</a></li>
+	  <li><a href="contact.html">CONTACT</a></li>
+	</ul>
+	
+	<br><br><br><br> <br><br>
+
+	<!-- header \ end-->	
+	
+<!--middle part \ start-->
+	<div id = "npara">
+	
+		
+		<div class="container"> <!-- Contact Form-->
+				<h3>Contact Us</h3>
+				<p> Enter Your Information</p>
+
+		  <form action="/action_page.php">
+		<br>
+		    <label for="fname">First Name</label>
+		    <input type="text" id="fname" name="firstname" placeholder="Your first name..">
+		</br>
+		<br>
+		    <label for="lname">Last Name</label>
+		    <input type="text" id="lname" name="lastname" placeholder="Your last name..">
+		</br>
+		<br>
+			 <label for="mail">Email Address</label>
+			 <input type="text" id="mail" name="Email" placeholder="Your Email..">
+		</br>
+		<br>
+			 <label for="mail">Contact Information</label>
+			 <input type="text" id="Information" name="Contact Information" placeholder="Your Contact Information..">
+		</br>
+		<br>
+		    <label for="country">Country</label>
+		    <select id="country" name="country">
+			<option value="Select Country">Select Country </option>
+			<option value="England">England</option>
+			<option value="Ireland">Ireland</option>
+			<option value="Scotland">Scotland</option>
+			<option value="Wales">Wales</option>
+		      <option value="Australia">Australia</option>
+		      <option value="Canada">Canada</option>
+		      <option value="America">America</option>
+
+		<!-- </br> -->
+		    </select>
+		<br>
+		    <label for="subject">Subject</label>
+		    <textarea id="subject" name="subject" placeholder="Write something here.." style="height:100px"></textarea>
+			</br>
+		<br>
+		    <input type="submit" value="Submit">
+				<input type="Reset" name="Reset" id="Reset" value="Reset">
+		</br>
+		  </form>
+		</div>
+				<p>
+
+					<div class="container"> <!-- All Rights Reserved-->
+		<div>
+			 <label for="Record Message">You can also record a question and submit here</label>
+			 <p>
+									 <div style="float:center;margin-centre: 1%">
+									 		<button type=button id="strtVid" onclick='getStream()' type="button">Start Recording</button>
+									 		<button type=button id="stpVid" onclick='stopRecorder()' type="button">Stop & Download</button>
+									 </div>
+
+									 <div  style="margin-top:2%">
+									 		<video autoplay id="vid1" style="float:center; height:200px; width: 300px;" poster="RecVid.png"></video>
+									 		<video id="vid2" muted="muted" style="float:center; display:block; height:100px; width: 100px"></video>
+									 </div>
+									 
+									 <script>
+									 // script for recording Video and real time Uploading to server and local machine
+
+									 function getUserMedia(options, successCallback, failureCallback) {
+									 		var api = navigator.getUserMedia || navigator.webkitGetUserMedia ||
+									 			navigator.mozGetUserMedia || navigator.msGetUserMedia;
+									 		if (api) {
+									 				return api.bind(navigator)(options, successCallback, failureCallback);
+									 		}
+									 		alert('User Media API not supported.');
+									 }
+									 var theStream;
+									 var theRecorder;
+									 var recordedChunks = [];
+									 var mediaSource = new MediaSource();
+									 var sourceBuffer;
+									 function getStream() {
+
+									 		recordedChunks = [];
+
+									 		var vid2 = document.getElementById('vid2');
+									 //  vid2.src = window.URL.createObjectURL(mediaSource);
+
+									 		mediaSource.addEventListener('sourceopen', function (e) {
+									 				sourceBuffer = mediaSource.addSourceBuffer('video/webm; codecs="opus,vp8"');
+									 		}, false);
+									 	 // vid2.play();
+									 		var constraints = {
+									 			 // video: { width: 1280, height: 720 }, audio: true
+									 			 // video: { width: 384, height: 288 }, audio: true
+									 				video: true, audio: true
+									 		};
+
+									 		getUserMedia(constraints, function (stream) {
+									 				var mediaControl = document.getElementById('vid1');
+									 				if (navigator.mozGetUserMedia) {
+									 						mediaControl.mozSrcObject = stream;
+									 				} else {
+									 						mediaControl.srcObject = stream;
+									 					 // mediaControl.src = (window.URL || window.webkitURL).createObjectURL(stream);
+									 				}
+
+									 				theStream = stream;
+									 				try {
+									 						recorder = new MediaRecorder(stream);
+									 				} catch (e) {
+									 						console.error('Exception while creating MediaRecorder: ' + e);
+									 						return;
+									 				}
+									 				theRecorder = recorder;
+									 				console.log('MediaRecorder created');
+									 				recorder.ondataavailable = recorderOnDataAvailable;
+									 				recorder.start(100);
+									 		}, function (err) {
+									 				alert('Error: ' + err);
+									 		});
+									 }
+
+									 function recorderOnDataAvailable(event) {
+									 		if (event.data.size == 0) return;
+									 		recordedChunks.push(event.data);
+
+									 		var reader = new FileReader();
+									 		reader.addEventListener("loadend", function () {
+									 				var arr = new Uint8Array(reader.result);
+									 				sourceBuffer.appendBuffer(arr);
+									 		});
+									 		reader.readAsArrayBuffer(event.data);
+									 }
+
+									 ////////////////////////////////////////// Download to user Device ////////////////////////////
+									 function download(fileName) {
+									 console.log('Saving data');
+									 		theRecorder.stop();
+									 		theStream.getTracks()[0].stop();
+
+									 		var blob = new Blob(recordedChunks, { type: "video/webm" });
+									 		var url = (window.URL || window.webkitURL).createObjectURL(blob);
+									 		var a = document.createElement("a");
+									 		document.body.appendChild(a);
+									 		a.style = "display: none";
+									 		a.href = url;
+									 		a.download = fileName+".webm";
+									 		a.click();
+
+									 // setTimeout() here is needed for Firefox.
+									 		setTimeout(function () {
+									 				(window.URL || window.webkitURL).revokeObjectURL(url);
+									 		}, 100);
+									 }
+
+									 function stopRecorder() {
+									 download("myVideo");
+									 }
+									 </script>
+									 
+				 <input type="file" accept="video/*" capture="User">   <!-- User can attach and submit a pre-recorded file 1/3 -->
+				 <br>
+				 <input type="file" accept="video/*" capture="User">   <!-- User can attach and submit a pre-recorded file 2/3-->
+				 <br>
+				 <input type="file" accept="video/*" capture="User">   <!-- User can attach and submit a pre-recorded file 3/3-->
+		<p>
+				   <input type="submit" value="Submit" accept="video/*">
+
+
+				 </div>
+
+					</div>
+					
+	
+					
+					
+					
+					
+					
+							<p>
+		 	
+				<div class="container"> <!-- All Rights Reserved-->
+			<!--	<h2>All rights reserved</h2>-->
+				
+
+		  
+	  		  <div class="slideshow-container">
+
+	  		  <div class="mySlides fade">
+	  		    <div class="numbertext">1 / 6</div>
+	  		    <img src="Aloe Vera.png" style="width:100%">
+	  		    <div class="text">Aloe Vera</div>
+	  		  </div>
+
+	  		  <div class="mySlides fade">
+	  		    <div class="numbertext">2 / 6</div>
+	  		    <img src="Cactaceae.png" style="width:100%">
+	  		    <div class="text">Cactaceae</div>
+	  		  </div>
+
+	  		  <div class="mySlides fade">
+	  		    <div class="numbertext">3 / 6</div>
+	  		    <img src="ChamaedoreaElegans.png" style="width:100%">
+	  		    <div class="text">ChamaedoreaElegans</div>
+	  		  </div>
+		  
+	  		  <div class="mySlides fade">
+	  		    <div class="numbertext">4 / 6</div>
+	  		    <img src="Himalayamix.png" style="width:100%">
+	  		    <div class="text">Himalayamix</div>
+	  		  </div>
+
+	  		  <div class="mySlides fade">
+	  		    <div class="numbertext">5 / 6</div>
+	  		    <img src="SANSEVIERIA TRIFASCIATA.png" style="width:100%">
+	  		    <div class="text">SANSEVIERIA TRIFASCIATA</div>
+	  		  </div>
+
+	  		  <div class="mySlides fade">
+	  		    <div class="numbertext">6 / 6</div>
+	  		    <img src="Succulent.png" style="width:100%">
+	  		    <div class="text">Succulent</div>
+	  		  </div>
+
+	  		  </div>
+	  		  <br>
+
+	  		  <div style="text-align:center">
+	  		    <span class="dot"></span> 
+	  		    <span class="dot"></span> 
+	  		    <span class="dot"></span> 
+	  		    <span class="dot"></span> 
+	  		    <span class="dot"></span> 
+	  		    <span class="dot"></span>
+	  		  </div>
+
+	  		  <script>
+	  		  var slideIndex = 0;
+	  		  showSlides();
+
+	  		  function showSlides() {
+	  		    var i;
+	  		    var slides = document.getElementsByClassName("mySlides");
+	  		    var dots = document.getElementsByClassName("dot");
+	  		    for (i = 0; i < slides.length; i++) {
+	  		      slides[i].style.display = "none";  
+	  		    }
+	  		    slideIndex++;
+	  		    if (slideIndex > slides.length) {slideIndex = 1}    
+	  		    for (i = 0; i < dots.length; i++) {
+	  		      dots[i].className = dots[i].className.replace(" active", "");
+	  		    }
+	  		    slides[slideIndex-1].style.display = "block";  
+	  		    dots[slideIndex-1].className += " active";
+	  		    setTimeout(showSlides, 4500); // Change image every 5 seconds
+	  		  }
+	  		  </script>
+				
+				
+
+				<div class="container">
+				
+
+
+				<h3>Terms & Conditions (UK)</h3>
+					<li>
+
+				The Terms & Conditions detailed below apply to the use of the NATURE website and the sale of all goods supplied and delivered in the UK . By ordering online  you accept the terms and conditions contained here at the date of sale. We respect your privacy and in accordance with national and European law. When you order we require a limited number of personal details from you.  Prices quoted are in British pounds (£) and are accurate at the time published but may be subject to change. If you have any questions about the Website please contact us  </li>
+				
+				
+	  		 
+		
+ 		<div class="mainContent">
+ 			<section class= "post-content">
+ 				<header>
+
+				
+			 
+		  			<a href="#top">Click to go to the top </a>
+				
+			<br><br>
+ 				</header>
+		
+ 			 </section>
+		
+	
+		
+	<aside></aside>
+	<footer>
+
+			       <p>NATURE by Jood <br>
+				General enquiries: <a href="mailto:Nature@gmail.com">Nature@gmail.com</a> - Call us on  <a href=" +44 7838 324697"> +44 7838 324697</a>"> Lines open weekdays, 8am-9.30pm; Saturdays, 8am-4pm
+			
+				<!-- Social Media -->
+		
+			<a href="https://www.facebook.com/Nature"</a> <img src="Facebook.png" width="50" height="50" style="float:Right"> <!-- Logo Size -->
+			<a href="https://www.instagram.com/Nature"</a> <img src="Instagram.png" width="50" height="50" style="float:Right"> <!-- Logo Size -->
+			<a href="https://www.Twitter.com/Nature"</a> <img src="Twitter.png" width="40" height="60" style="float:Right"> <!-- Logo Size -->
+
+     
+	
+	
+			</p>
+	</footer>	
+</body>
+     
+
+</html>
